@@ -1,0 +1,103 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.26.2.0
+Copyright (C) 2018 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: Nam Tran, intel, LIC=----
+ 
+Tool Versions:
+Toolchain:       MDK-Lite  Version: 5.26.2.0
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 6 (build 750)
+Assembler:       Armasm.exe V5.06 update 6 (build 750)
+Linker/Locator:  ArmLink.exe V5.06 update 6 (build 750)
+Library Manager: ArmAr.exe V5.06 update 6 (build 750)
+Hex Converter:   FromElf.exe V5.06 update 6 (build 750)
+CPU DLL:         SARMCM3.DLL V5.26.2.0
+Dialog DLL:      DARMCM1.DLL V1.19.1.0
+Target DLL:      PEMicro\Pemicro_ArmCortexInterface.dll V1.11
+Dialog DLL:      TARMCM1.DLL V1.14.0.0
+ 
+<h2>Project:</h2>
+C:\project_nhung\FRDMKL46Z.uvprojx
+Project File Date:  06/06/2023
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Rebuild target 'Target 1'
+assembling startup_MKL46Z4.s...
+compiling system_MKL46Z4.c...
+compiling project.c...
+project.c(177): warning:  #1295-D: Deprecated declaration LCD_clear - give arg types
+  void LCD_clear();
+project.c(180): warning:  #1295-D: Deprecated declaration display_outofrange - give arg types
+  void display_outofrange();
+project.c(335): warning:  #177-D: variable "head"  was declared but never referenced
+  	  int head =0;
+project.c(336): warning:  #177-D: variable "tail"  was declared but never referenced
+      int tail =1;
+project.c(337): warning:  #550-D: variable "average_accel"  was set but never used
+  	  float average_accel = 0;
+project.c(339): warning:  #177-D: variable "pre_sample"  was declared but never referenced
+  		float pre_sample=0;
+project.c(342): warning:  #177-D: variable "number_of_sample"  was declared but never referenced
+  	  float number_of_sample = 1;
+project.c(343): warning:  #550-D: variable "peak_value"  was set but never used
+  	  float peak_value=0;
+project.c(358): warning:  #177-D: variable "time_out"  was declared but never referenced
+  	  uint32_t time_out = 0;
+project.c(383): warning:  #177-D: variable "trigger_timeout2"  was declared but never referenced
+  		int trigger_timeout1,trigger_timeout2=0;
+project.c(384): warning:  #177-D: variable "substract"  was declared but never referenced
+  	  float substract= 0;
+project.c(463): warning:  #550-D: variable "result"  was set but never used
+      uint8_t result =0;
+project.c(579): warning:  #940-D: missing return statement at end of non-void function "MY_I2C_MasterRepeatedStart" 
+  }
+project.c(888): warning:  #1-D: last line of file ends without a newline
+  }
+project.c: 14 warnings, 0 errors
+linking...
+.\Objects\FRDMKL46Z.axf: Warning: L6914W: option ro-base ignored when using --scatter.
+.\Objects\FRDMKL46Z.axf: Warning: L6914W: option rw-base ignored when using --scatter.
+.\Objects\FRDMKL46Z.axf: Warning: L6340W: options first and last are ignored for link type of scattered
+Program Size: Code=10488 RO-data=416 RW-data=20 ZI-data=2144  
+Finished: 0 information, 3 warning and 0 error messages.
+".\Objects\FRDMKL46Z.axf" - 0 Error(s), 17 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.5.9.0.pack
+                ARM.CMSIS.5.9.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.6.0
+
+Package Vendor: NXP
+                http://mcuxpresso.nxp.com/cmsis_pack/repo/NXP.MKL46Z4_DFP.10.0.3.pack
+                NXP.MKL46Z4_DFP.10.0.3
+                Device Family Pack for MKL46Z4
+   * Component: Startup Version: 1.0.0
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\Device\MKL46Z256VLL4
+  .\RTE\_Target_1
+  C:\Users\MY PC\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\Core\Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:5.6.0
+
+   * Component: NXP::Device:Startup:1.0.0
+      Include file:  MKL46Z4.h
+      Include file:  MKL46Z4_features.h
+      Include file:  fsl_device_registers.h
+      Source file:   arm\startup_MKL46Z4.s
+      Include file:  system_MKL46Z4.h
+      Source file:   system_MKL46Z4.c
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>
