@@ -1,12 +1,9 @@
-//#include "board.h"
-//#include "fsl_debug_console.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-//#include "pin_mux.h"
 #include <math.h>
-#include "MKL46Z4.h"                    // NXP::Device:Startup
+#include "MKL46Z4.h" // NXP::Device:Startup
 #define I2C_RELEASE_SDA_PORT PORTE
 #define I2C_RELEASE_SCL_PORT PORTE
 #define I2C_RELEASE_SDA_GPIO GPIOE
@@ -20,13 +17,13 @@
 #define ACCEL_I2C_CLK_SRC I2C0_CLK_SRC
 #define ACCEL_I2C_CLK_FREQ CLOCK_GetFreq(I2C0_CLK_SRC)
 typedef struct transfer {
-			//uint32_t flags;            /*!< A transfer flag which controls the transfer. */  // dat 0 neu muon tao s
-			uint8_t slaveAddress;      /*!< 7-bit slave address. */
-			uint8_t direction; /*!< A transfer direction, read or write. */
-			uint32_t subaddress;       /*!< A sub address. Transferred MSB first. */
-			uint8_t subaddressSize;    /*!< A size of the command buffer. */
-			uint8_t *volatile data;    /*!< A transfer buffer. */
-			volatile size_t dataSize; 
+	//uint32_t flags;            /*!< A transfer flag which controls the transfer. */  // dat 0 neu muon tao s
+	uint8_t slaveAddress;      /*!< 7-bit slave address. */
+	uint8_t direction; /*!< A transfer direction, read or write. */
+	uint32_t subaddress;       /*!< A sub address. Transferred MSB first. */
+	uint8_t subaddressSize;    /*!< A size of the command buffer. */
+	uint8_t *volatile data;    /*!< A transfer buffer. */
+	volatile size_t dataSize; 
 } i2c_transfer; 
 typedef enum slcd_phase_type{
     kSLCD_PhaseAActivate = 0x01U,  /*!< LCD waveform phase A activates. */
@@ -37,7 +34,7 @@ typedef enum slcd_phase_type{
     kSLCD_PhaseFActivate = 0x20U,  /*!< LCD waveform phase F activates. */
     kSLCD_PhaseGActivate = 0x40U,  /*!< LCD waveform phase G activates. */
     kSLCD_PhaseHActivate = 0x80U,   /*!< LCD waveform phase H activates. */
-	  LCD_Clear = 0x00U
+	LCD_Clear = 0x00U
 } slcd_phase_t;
 #define TransferDefaultFlag  (uint32_t)0x0,       /*!< A transfer starts with a start signal, stops with a stop signal. */
 #define TransferNoStartFlag  (uint32_t)0x1,       /*!< A transfer starts without a start signal, only support write only or write+read with no start flag, do not support read only with no start flag. */
@@ -48,14 +45,14 @@ typedef enum slcd_phase_type{
  * Prototypes
  ******************************************************************************/
 void SetSimConfig(){
-	  SIM->CLKDIV1 = 0x10010000U;
+	SIM->CLKDIV1 = 0x10010000U;
 	// outdiv1: 1000: 2
 	//outdiv4: 001: 2
-	  SIM->SOPT2 = ((SIM->SOPT2 & ~SIM_SOPT2_PLLFLLSEL_MASK) | SIM_SOPT2_PLLFLLSEL(1U));  // lua chon clock la MCGPLLCLK 
-	  SIM->SOPT1 = ((SIM->SOPT1 & ~SIM_SOPT1_OSC32KSEL_MASK) | SIM_SOPT1_OSC32KSEL(3U));  // lua chon clock cho LCD la LPO 1khz
+	SIM->SOPT2 = ((SIM->SOPT2 & ~SIM_SOPT2_PLLFLLSEL_MASK) | SIM_SOPT2_PLLFLLSEL(1U));  // lua chon clock la MCGPLLCLK 
+	SIM->SOPT1 = ((SIM->SOPT1 & ~SIM_SOPT1_OSC32KSEL_MASK) | SIM_SOPT1_OSC32KSEL(3U));  // lua chon clock cho LCD la LPO 1khz
 }
 void SetSimSafeDivs(void){
-      SIM->CLKDIV1 = 0x10030000U;
+    SIM->CLKDIV1 = 0x10030000U;
 	// set gia tri 1000 cho truong OUTDIV1: chia cho 2
 	// set gia tri 011 cho truong OUTDIV4: chia cho 4
 }
@@ -63,12 +60,12 @@ void SetInternalRefClkConfig(){
     MCG->C2 = (MCG->C2 & ~MCG_C2_IRCS_MASK) | (MCG_C2_IRCS(0));  // lua chon slow internal clock
     MCG->C1 = (MCG->C1 & ~(MCG_C1_IRCLKEN_MASK | MCG_C1_IREFSTEN_MASK)) | (uint8_t)MCG_C1_IRCLKEN_MASK; //MCGIRCLK active
     //Doi cho co MCGIRCLK duoc set tren thanh ghi status  
-        while (((MCG->S & MCG_S_IRCST_MASK) >> MCG_S_IRCST_SHIFT) != 0){}
+    while (((MCG->S & MCG_S_IRCST_MASK) >> MCG_S_IRCST_SHIFT) != 0){}
 }
 void PLL_Init(){  
     MCG->C2 &= ~MCG_C2_LP_MASK; // Disable lowpower. 
     MCG->C1 = ((MCG->C1 & ~(MCG_C1_CLKS_MASK | MCG_C1_IREFS_MASK)) | MCG_C1_CLKS(2U));
-		// dat 2 bit 7-6 cua C1 ve khong( lua chon PLL hoac FLL tuy thuoc vao bit PLLS), sau do set lai bang 10 => lua chon external clock 
+	// dat 2 bit 7-6 cua C1 ve khong( lua chon PLL hoac FLL tuy thuoc vao bit PLLS), sau do set lai bang 10 => lua chon external clock 
     // Doi cho den khi thanh ghi status mcg cat nhap gia tri theo gia tri cua thanh ghi c1 da setting o phia trens
     while ((MCG->S & (MCG_S_IREFST_MASK | MCG_S_CLKST_MASK)) !=(MCG_S_IREFST(0U) | MCG_S_CLKST(2U))){}
     MCG->C6 &= ~MCG_C6_PLLS_MASK; // tam thoi lua chon FLL 
@@ -76,50 +73,51 @@ void PLL_Init(){
     {
     uint8_t mcg_c5 = 0U;
     mcg_c5 |= MCG_C5_PRDIV0(0x1U); 
-		// divide factor cho PLL tu nguon external clock = 2, clock cua PLL = external clock/2;
+	// divide factor cho PLL tu nguon external clock = 2, clock cua PLL = external clock/2;
     MCG->C5 = mcg_c5; 
-			MCG->C6 = (MCG->C6 & ~MCG_C6_VDIV0_MASK) | MCG_C6_VDIV0(0x0U); // Multiply factory cho VCO output of PLL is 24, VCO = PLL *24;
+	MCG->C6 = (MCG->C6 & ~MCG_C6_VDIV0_MASK) | MCG_C6_VDIV0(0x0U); // Multiply factory cho VCO output of PLL is 24, VCO = PLL *24;
     MCG->C5 |= ((uint32_t)MCG_C5_PLLCLKEN0_MASK | (uint32_t)0U);  // MCGPLLCLK is active, enable module PLL doc lap voi PLLS
     while (!(MCG->S & MCG_S_LOCK0_MASK)){}  // doi cho den khi PLL duoc enable
     }
     MCG->C6 |= MCG_C6_PLLS_MASK;  // chon PLL cho dau ra cua MCGOUTCLOCK
     while (!(MCG->S & MCG_S_PLLST_MASK)){}  // doi co den khi PLL duoc chon
-			MCG->C1 = (MCG->C1 & ~MCG_C1_CLKS_MASK) | MCG_C1_CLKS(0); // quay lai setting thanh ghi C1: CLKS = 00 => lua chon nguon tu PLL
-	  while (((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 3){}  // doi cho den khi output la PLL
+	MCG->C1 = (MCG->C1 & ~MCG_C1_CLKS_MASK) | MCG_C1_CLKS(0); // quay lai setting thanh ghi C1: CLKS = 00 => lua chon nguon tu PLL
+	while (((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 3){}  // doi cho den khi output la PLL
 }
-void InitOsc0(){  // Ham nay enable OSCERCLK, dat dai tan so ve che do hoat dong cua giao dong ky, va lua chon nguon clock tham chieu ben ngoai cua module MCG tu giao dong ky
-	  OSC0->CR = 0x80;  // 
-	  /* 
-	bit 7: 1 External reference clock is enabled
-	bit 5: 0 External reference clock is disabled in Stop mode
-	bit 3:Oscillator 2 pF Capacitor Load Configure: 0 Disable the selection.
-	bit 2:Oscillator 4 pF Capacitor Load Configure: 0 Disable the selection.
-	bit 1:Oscillator 8 pF Capacitor Load Configure: 0 Disable the selection
-	bit 0:Oscillator 16 pF Capacitor Load Configure: 0 Disable the selection.
-	  */ 
-		MCG->C2 = 0x94;
-		/*  
-		Cac bit cua thanh ghi C2:
+void InitOsc0(){  
+	// Ham nay enable OSCERCLK, dat dai tan so ve che do hoat dong cua giao dong ky, va lua chon nguon clock tham chieu ben ngoai cua module MCG tu giao dong ky
+	OSC0->CR = 0x80;
+	/* 
+	  	bit 7: 1 External reference clock is enabled
+		bit 5: 0 External reference clock is disabled in Stop mode
+		bit 3:Oscillator 2 pF Capacitor Load Configure: 0 Disable the selection.
+		bit 2:Oscillator 4 pF Capacitor Load Configure: 0 Disable the selection.
+		bit 1:Oscillator 8 pF Capacitor Load Configure: 0 Disable the selection
+		bit 0:Oscillator 16 pF Capacitor Load Configure: 0 Disable the selection.
+	*/ 
+	MCG->C2 = 0x94;
+	/*  
+		C2 register:
 		Bit 7:  1 Generate a reset request on a loss of OSC0 external reference clock 
-		Bit 5-4: 01 Encoding 1 — High frequency range selected for the crystal oscillator: 3-32 Mhz
+		Bit 5-4: 01 Encoding 1 ï¿½ High frequency range selected for the crystal oscillator: 3-32 Mhz
 		Bit 3: 0 Configure crystal oscillator for low-power operation.
 		Bit 2: External Reference Select: 1 Oscillator requested.
 		Bit 1: Low Power Select: 0 FLL or PLL is not disabled in bypass modes
 		Bit 0: Internal Reference Clock Select: 0 Slow internal reference clock selected.
-		*/
-    if ((OSC0->CR & OSC_CR_ERCLKEN_MASK))
-    {  // Kiem tra bit 1 thanh ghi OSC0->S xem qua trinh thiet lap OSC da hoan thanh chua ?, bit nay duoc dat gia tri 1 khi qua trinh thiet lap hoan thanh
+	*/
+    if ((OSC0->CR & OSC_CR_ERCLKEN_MASK)){  
+		// Kiem tra bit 1 thanh ghi OSC0->S xem qua trinh thiet lap OSC da hoan thanh chua ?, bit nay duoc dat gia tri 1 khi qua trinh thiet lap hoan thanh
         while (!(MCG->S & MCG_S_OSCINIT0_MASK)){}
     }
 }
 void SetFllExtRefDiv(void){// ham any lua chon nguon clock cho MCGOUTCLK la FLL hoac PLL, su dung nguon clock cho FLL la slow internal: 32khz, MCGIRCLK inactive tam thoi disable
-	  MCG->C1 = 0x4;
-	  /*
-	Bit 7-6: Selects the clock source for MCGOUTCLK: Encoding 0 — Output of FLL or PLL is selected (depends on PLLS control bit)
-	Bit 5-3: FLL External Reference Divider 000, ta khong su dung nguon external
-  Bit 2: Internal Reference Select: 1 The slow internal reference clock is selected
-	Bit 1: Internal Reference Clock Enable: 0 MCGIRCLK inactive
-	Bit 0: Controls whether or not the internal reference clock remains enabled when the MCG enters Stop mode: 0 disable
+	MCG->C1 = 0x4;
+	/*
+		Bit 7-6: Selects the clock source for MCGOUTCLK: Encoding 0 ï¿½ Output of FLL or PLL is selected (depends on PLLS control bit)
+		Bit 5-3: FLL External Reference Divider 000, ta khong su dung nguon external
+  		Bit 2: Internal Reference Select: 1 The slow internal reference clock is selected
+		Bit 1: Internal Reference Clock Enable: 0 MCGIRCLK inactive
+		Bit 0: Controls whether or not the internal reference clock remains enabled when the MCG enters Stop mode: 0 disable
 	*/
 }
 static void i2c_release_bus_delay(void){
@@ -131,38 +129,33 @@ static void i2c_release_bus_delay(void){
 }
 void I2C_ReleaseBus(void){
   	SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
-	  PORTE->PCR[24] = (uint32_t)(1<<0|1<<1|1<<8);
-		PORTE->PCR[25] = (uint32_t)(1<<0|1<<1|1<<8);
-	  GPIOE->PDDR |= (uint32_t)(1<<24|1<<25);
-	  GPIOE->PDOR |= (uint32_t)(1<<24|1<<25);
-     // gui tin hieu start
-	  GPIOE->PCOR |= (uint32_t)(1<<25);
+	PORTE->PCR[24] = (uint32_t)(1<<0|1<<1|1<<8);
+	PORTE->PCR[25] = (uint32_t)(1<<0|1<<1|1<<8);
+	GPIOE->PDDR |= (uint32_t)(1<<24|1<<25);
+	GPIOE->PDOR |= (uint32_t)(1<<24|1<<25);
+    // gui tin hieu start
+	GPIOE->PCOR |= (uint32_t)(1<<25);
     i2c_release_bus_delay();
     // Gui 9 xung tren SCL va giu SDA high 
     for (int i = 0; i < 9; i++)
     {
-			  GPIOE->PCOR |= (uint32_t)(1<<24);
+		GPIOE->PCOR |= (uint32_t)(1<<24);
         i2c_release_bus_delay(); 
-
-			  GPIOE->PSOR |= (uint32_t)(1<<25);
+		GPIOE->PSOR |= (uint32_t)(1<<25);
         i2c_release_bus_delay();
-
-			  GPIOE->PSOR |= (uint32_t)(1<<24);
+		GPIOE->PSOR |= (uint32_t)(1<<24);
         i2c_release_bus_delay();
         i2c_release_bus_delay();
     }
 
     // Send stop 
-		GPIOE->PCOR |= (uint32_t)(1<<24);
+	GPIOE->PCOR |= (uint32_t)(1<<24);
     i2c_release_bus_delay();
-
-		GPIOE->PCOR |= (uint32_t)(1<<25);
+	GPIOE->PCOR |= (uint32_t)(1<<25);
     i2c_release_bus_delay();
-
-		GPIOE->PSOR |= (uint32_t)(1<<24);
+	GPIOE->PSOR |= (uint32_t)(1<<24);
     i2c_release_bus_delay();
-
-	  GPIOE->PSOR |= (uint32_t)(1<<25);
+	GPIOE->PSOR |= (uint32_t)(1<<25);
     i2c_release_bus_delay();
 }
 int volatile state=0;
@@ -189,9 +182,10 @@ int MY_I2C_MasterRepeatedStart(I2C_Type *base, uint8_t address, uint8_t directio
 void I2C_MasterStopSignal(I2C_Type* base);
 void MY_I2C_MasterReadBlocking(I2C_Type *base, uint8_t *rxBuff, size_t rxSize);
 void I2C_MasterStartSignal(I2C_Type* base, uint8_t address, uint8_t direction);
-void I2C_ConfigurePins(void){ // Cap clock va configure cac chan PTE24 va PTE25
+void I2C_ConfigurePins(void){ 
+	// Cap clock va configure cac chan PTE24 va PTE25
 	SIM->SCGC5 = SIM->SCGC5 | SIM_SCGC5_PORTE_MASK; //clock to PTE24 and PTE25 for I2C0
-  PORTE->PCR[24] = (((1u<<10) & ~(1u<<9)) | (1u<<8)|(1u<<0)|(1u<<2)|(1u<<1))&(~(1u<<4))&(~(1u<<6));
+  	PORTE->PCR[24] = (((1u<<10) & ~(1u<<9)) | (1u<<8)|(1u<<0)|(1u<<2)|(1u<<1))&(~(1u<<4))&(~(1u<<6));
 	PORTE->PCR[25] = (((1u<<10) & ~(1u<<9)) | (1u<<8)|(1u<<0)|(1u<<2)|(1u<<1))&(~(1u<<4))&(~(1u<<6));
 }
 void I2C_WriteAccelReg(I2C_Type *base, uint8_t device_addr, uint8_t reg_addr, uint8_t value){
@@ -225,84 +219,80 @@ void I2C_ReadAccelRegs(I2C_Type *base, uint8_t device_addr, uint8_t reg_addr, ui
     //PRINTF("DA out ra khoi vong while \r\n");
 }
 void Clear_flags(){ 
-     uint32_t t =(I2C_S_ARBL_MASK|I2C_S_IICIF_MASK)|(I2C_FLT_STOPF_MASK << 8);  // lay gia tri co co phat hien tin hieu stop o thanh ghi FLT
-		if(t&(I2C_FLT_STOPF_MASK << 8)){  // neu detect duoc tin hieu stop
-		     // xoa co stop neu co o thanh ghi FLT
-        I2C0->FLT |= (uint8_t)(t >> 8U);
-		}
-		// xoa tat ca cac bit thanh ghi status, clear bit ARBL va set bit interrupt detect
-	  I2C0->S = (uint8_t)t;
+    uint32_t t =(I2C_S_ARBL_MASK|I2C_S_IICIF_MASK)|(I2C_FLT_STOPF_MASK << 8);  // lay gia tri co co phat hien tin hieu stop o thanh ghi FLT
+	if(t&(I2C_FLT_STOPF_MASK << 8)){  // neu detect duoc tin hieu stop
+		// xoa co stop neu co o thanh ghi FLT
+    	I2C0->FLT |= (uint8_t)(t >> 8U);
+	}
+	// xoa tat ca cac bit thanh ghi status, clear bit ARBL va set bit interrupt detect
+	I2C0->S = (uint8_t)t;
 }
 void Init_Master(){ 
-			SIM->SCGC4 = SIM->SCGC4 | SIM_SCGC4_I2C0_MASK;
-			/* Reset the module. */
-			I2C0->A1 = 0;
-			I2C0->F = 0;
-			I2C0->C1 = 0;
-			I2C0->S = 0xFFU;
-			I2C0->C2 = 0;
-			I2C0->FLT = 0x50U;  
-			I2C0->RA = 0;
-			// Disable module I2C
-			I2C0->C1 &= ~(I2C_C1_IICEN_MASK);
-	    // Clear Flags
-			Clear_flags();
-	    I2C0->F = I2C_F_MULT(0U) | I2C_F_ICR(31U);  // Set baurd rate for i2c module
-			/* Read out the FLT register. */
-			uint8_t fltReg =  0;
-			//fltReg = I2C0->FLT;
-			//fltReg &= ~(I2C_FLT_SHEN_MASK); // disable stop hold
-			//fltReg &= ~(I2C_FLT_FLT_MASK);
-      //fltReg |= I2C_FLT_FLT(0U);  // glitchFilterWidth = 0;
-      I2C0->FLT = fltReg;
-      I2C0->C1 = I2C_C1_IICEN(1); // Enable module I2C
+	SIM->SCGC4 = SIM->SCGC4 | SIM_SCGC4_I2C0_MASK;
+	/* Reset the module. */
+	I2C0->A1 = 0;
+	I2C0->F = 0;
+	I2C0->C1 = 0;
+	I2C0->S = 0xFFU;
+	I2C0->C2 = 0;
+	I2C0->FLT = 0x50U;  
+	I2C0->RA = 0;
+	// Disable module I2C
+	I2C0->C1 &= ~(I2C_C1_IICEN_MASK);
+	// Clear Flags
+	Clear_flags();
+	I2C0->F = I2C_F_MULT(0U) | I2C_F_ICR(31U);  // Set baurd rate for i2c module
+	/* Read out the FLT register. */
+	uint8_t fltReg =  0;
+    I2C0->FLT = fltReg;
+    I2C0->C1 = I2C_C1_IICEN(1); // Enable module I2C
 } 
 int32_t volatile mstick = 0;
 int32_t volatile blink_mstick=0;
 void init_systick(){
-	   NVIC_SetPriority(SysTick_IRQn,(1<<7)-1);
-     SysTick->LOAD = SystemCoreClock/1000; 
-	   SysTick->CTRL = 1<<2 |  1<<1 | 1<<0;
+	NVIC_SetPriority(SysTick_IRQn,(1<<7)-1);
+    SysTick->LOAD = SystemCoreClock/1000; 
+	SysTick->CTRL = 1<<2 |  1<<1 | 1<<0;
 }
 int number_of_step = 0;
 void toggle_green_led(){
-	 PTD->PDOR^= (uint8_t)(1<<5);
+	PTD->PDOR^= (uint8_t)(1<<5);
 }
-void SysTick_Handler (void){
-	 if(blink_mstick>=1000){
-	 blink_mstick = 0;
-   toggle_green_led();
-	 }
-   mstick++;
-	 blink_mstick++;
+void SysTick_Handler(void) {
+	if(blink_mstick>=1000){
+		blink_mstick = 0;
+		toggle_green_led();
+	}
+	mstick++;
+	blink_mstick++;
 }
 void delay(uint32_t tick){
-   while(mstick < tick);
-	 mstick = 0;
+	while(mstick < tick);
+	mstick = 0;
 }
 void green_led_init(){
-	 SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK;
-	 PORTD->PCR[5] =  1<<8; // dat chan 5 cong D o che do IO
-	 PTD->PDDR =  1<<5; // dat chan 5 o che do doc va ghi 
-	 PTD->PDOR &= ~(1<<5); // set led chan 5 sang
+	SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK;
+	PORTD->PCR[5] =  1<<8; // dat chan 5 cong D o che do IO
+	PTD->PDDR =  1<<5; // dat chan 5 o che do doc va ghi 
+	PTD->PDOR &= ~(1<<5); // set led chan 5 sang
 }
 void red_led_init(){
-   SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
-   PORTE->PCR[29] |= 1<<8;
-	 PTE->PDDR = 1<<29;
-	 PTE->PDOR &= ~(1<<29);
-	 SysTick->CTRL &= (int32_t)~(1<<0);
+	SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;
+	PORTE->PCR[29] |= 1<<8;
+	PTE->PDDR = 1<<29;
+	PTE->PDOR &= ~(1<<29);
+	SysTick->CTRL &= (int32_t)~(1<<0);
 }
 void toggle_red_led(){
-   PTE->PDOR^= (uint32_t)(1<<29);
+	PTE->PDOR^= (uint32_t)(1<<29);
 }
 void portc_portd_nvic_init(){
 	 NVIC_ClearPendingIRQ(PORTC_PORTD_IRQn);
 	 SIM->SCGC5 |= SIM_SCGC5_PORTC_MASK;
 	 SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK;
-   PORTC->PCR[3]   |=  ((uint8_t)(1<<0)|(uint8_t)(1<<1)|PORT_PCR_IRQC(0xA)|PORT_PCR_MUX(1));
+   	 PORTC->PCR[3]   |=  ((uint8_t)(1<<0)|(uint8_t)(1<<1)|PORT_PCR_IRQC(0xA)|PORT_PCR_MUX(1));
 	 PORTC->PCR[12]  |=  ((uint8_t)(1<<0)|(uint8_t)(1<<1)|PORT_PCR_IRQC(0xA)|PORT_PCR_MUX(1));
-   NVIC_SetPriority(PORTC_PORTD_IRQn,(1<<7));
+     NVIC_SetPriority(PORTC_PORTD_IRQn,(1<<7));
 	 NVIC_EnableIRQ(PORTC_PORTD_IRQn);
 }
 void PORTC_PORTD_IRQHandler(){
@@ -329,72 +319,63 @@ void PORTC_PORTD_IRQHandler(){
 }
 int MY_I2C_MasterTransferBlocking(I2C_Type* base, i2c_transfer * xfer);
 int main(void){   
-	  int number_of_detect = 0;
-	  int is_detecting_step=0;
-	  int number_of_peak_detect = 0;
-	  int head =0;
+	int number_of_detect = 0;
+	int is_detecting_step=0;
+	int number_of_peak_detect = 0;
+	int head =0;
     int tail =1;
-	  float average_accel = 0;
-		float current_sample =0;
-		float pre_sample=0;
-		float accel=0;	
+	float average_accel = 0;
+	float current_sample =0;
+	float pre_sample=0;
+	float accel=0;	
   	char cmd[10];
-	  float number_of_sample = 1;
-	  float peak_value=0;
-	  uint32_t thread_hold_peak = 1100;
-    //BOARD_InitPins();
-	  //BOARD_InitDebugConsole();
-    //start BOARD_BootClockRUN();
-	  SetSimSafeDivs();
+	float number_of_sample = 1;
+	float peak_value=0;
+	uint32_t thread_hold_peak = 1100;
+	SetSimSafeDivs();
     InitOsc0();
     SetFllExtRefDiv();
-		PLL_Init();
-		SetInternalRefClkConfig();
-	  SetSimConfig();
+	PLL_Init();
+	SetInternalRefClkConfig();
+	SetSimConfig();
     SystemCoreClock = 48000000U;
-		// end BOARD_BootClockRUN();
-		
-	  I2C_ReleaseBus();
+	I2C_ReleaseBus();
     I2C_ConfigurePins();
-	  uint32_t time_out = 0;
-		
-		//PRINTF("GIA TRI DANG CAN TEST: %d\r\n",kOSC_ErClkEnable);
-	  LCD_Init(LCD);
-	  green_led_init();
-	  init_systick();
-	  red_led_init();
-	  portc_portd_nvic_init();
+	uint32_t time_out = 0;
+	LCD_Init(LCD);
+	green_led_init();
+	init_systick();
+	red_led_init();
+	portc_portd_nvic_init();
     uint8_t rx_buffer[] = {0,0,0,0,0,0};
-		Init_Master();
-		MY_SLCD_SetBackPlanePhase(LCD, 40, kSLCD_PhaseAActivate); /* SLCD COM0 --- LCD_P40. */
+	Init_Master();
+	MY_SLCD_SetBackPlanePhase(LCD, 40, kSLCD_PhaseAActivate); /* SLCD COM0 --- LCD_P40. */
     MY_SLCD_SetBackPlanePhase(LCD, 52, kSLCD_PhaseBActivate); /* SLCD COM1 --- LCD_P52. */
     MY_SLCD_SetBackPlanePhase(LCD, 19, kSLCD_PhaseCActivate); /* SLCD COM2 --- LCD_P19. */
     MY_SLCD_SetBackPlanePhase(LCD, 18, kSLCD_PhaseDActivate); /* SLCD COM3 --- LCD_P18. */
-	  I2C_ReadAccelRegs(I2C0,0x1D,0x0D,rx_buffer,1);
-		uint8_t databyte =0;
-		I2C_WriteAccelReg(I2C0,0x1D,0x2AU,databyte);  // disable accelerometer, ghi vao thang ghi control 1
-		databyte = (uint8_t)(1<<0)+ (uint8_t)(1<<4);
-		I2C_WriteAccelReg(I2C0,0x1D,0x0EU,databyte);  // ghi bit 1 vao HPF_Out va FS0 vao thanh ghi XYZ_DATA_CFG Register
-		databyte = (uint8_t)(1<<0)+(uint8_t)(1<<4);  
-		I2C_WriteAccelReg(I2C0,0x1D,0x0F,databyte);  // write to HP_FILTER_CUTOFF register
-		databyte = 0x0D;
-		I2C_WriteAccelReg(I2C0,0x1D,0x2AU,databyte);   // ghi 00001101 vao thanh ghi control 1
-	  int16_t x,y,z =0;
-		uint32_t timeout1, timeout2 = 0;
-		int trigger_timeout1,trigger_timeout2=0;
-	  float substract= 0;
-		// read first sample data 
+	I2C_ReadAccelRegs(I2C0,0x1D,0x0D,rx_buffer,1);
+	uint8_t databyte =0;
+	I2C_WriteAccelReg(I2C0,0x1D,0x2AU,databyte);  // disable accelerometer, ghi vao thang ghi control 1
+	databyte = (uint8_t)(1<<0)+ (uint8_t)(1<<4);
+	I2C_WriteAccelReg(I2C0,0x1D,0x0EU,databyte);  // ghi bit 1 vao HPF_Out va FS0 vao thanh ghi XYZ_DATA_CFG Register
+	databyte = (uint8_t)(1<<0)+(uint8_t)(1<<4);  
+	I2C_WriteAccelReg(I2C0,0x1D,0x0F,databyte);  // write to HP_FILTER_CUTOFF register
+	databyte = 0x0D;
+	I2C_WriteAccelReg(I2C0,0x1D,0x2AU,databyte);   // ghi 00001101 vao thanh ghi control 1
+	int16_t x,y,z =0;
+	uint32_t timeout1, timeout2 = 0;
+	int trigger_timeout1,trigger_timeout2=0;
+	float substract= 0;
+	// read first sample data 
     I2C_ReadAccelRegs(I2C0,0x1D,0x01,rx_buffer,6);
     x = (int16_t)(256U*rx_buffer[0]|rx_buffer[1])/4U; 
-	  y = (int16_t)(256u*rx_buffer[2]|rx_buffer[3])/4U;
-		z = (int16_t)(256U*rx_buffer[4]|rx_buffer[5])/4U;
-		x*=2; y*=2;
-		accel = (float)x*x+(float)y*y+(float)z*z;
-	  current_sample = sqrt(accel);
-		peak_value = current_sample;
-		//queue_data[0]  = current_sample;  // first sample data to queue
-		average_accel  = current_sample; // the first value of average value
-		//average_of_peak_value = current_sample;
+	y = (int16_t)(256u*rx_buffer[2]|rx_buffer[3])/4U;
+	z = (int16_t)(256U*rx_buffer[4]|rx_buffer[5])/4U;
+	x*=2; y*=2;
+	accel = (float)x*x+(float)y*y+(float)z*z;
+	current_sample = sqrt(accel);
+	peak_value = current_sample;
+	average_accel  = current_sample; // the first value of average value
     while (1)
     {
 			I2C_ReadAccelRegs(I2C0,0x1D,0x01,rx_buffer,6);
@@ -404,92 +385,83 @@ int main(void){
 			x*=2; y*=2;
 			accel = (float)x*x+(float)y*y;
 			current_sample = sqrt(accel);
-		  if(trigger_timeout1 == 1&&is_detecting_step == 0){
-			   timeout1++;
-				 if(timeout1 > 200){number_of_peak_detect =0;
+		  	if(trigger_timeout1 == 1&&is_detecting_step == 0){
+				timeout1++;
+				if(timeout1 > 200){number_of_peak_detect =0;
 					 timeout1 = 0;
 					 trigger_timeout1 = 0;
-				 }
+				}
 			}
-		  if(is_detecting_step ==0&&number_of_peak_detect <5){
-			   if(current_sample>thread_hold_peak){
+			if(is_detecting_step ==0&&number_of_peak_detect <5){
+				if(current_sample>thread_hold_peak){
 					  if(trigger_timeout1 == 0)trigger_timeout1 =1;
 				    number_of_peak_detect++;
-				 }
+				}
 			}
 			else if(is_detecting_step ==0&&number_of_peak_detect>=5){
-				  is_detecting_step = 1;
-				  timeout1 = 0;
-				  trigger_timeout1 = 0;
-				  number_of_peak_detect = 0;
+				is_detecting_step = 1;
+				timeout1 = 0;
+				trigger_timeout1 = 0;
+				number_of_peak_detect = 0;
 			}
 			else if(is_detecting_step==1){
-			   timeout2++;
-				 if(timeout2>400){
-						   timeout2 = 0;
-							 is_detecting_step = 0;
-					     number_of_detect = 0;
-					     number_of_peak_detect = 0;
-				 }
-			   if(current_sample <= 200&&number_of_detect<8){
-				      number_of_detect++;
-				 }
-				 else if(number_of_detect>=8){
-					     if(timeout2 >=100){
-							 if(thread_hold_peak == 1100)thread_hold_peak=800;
-							 else if(thread_hold_peak==800)thread_hold_peak = 1100;
-				       LCD_clear();
-					     number_of_step++;
-					     display_decimal(number_of_step);
-							 }
-							 timeout2 = 0;
-							 is_detecting_step = 0;
-					     number_of_detect = 0;
-					     number_of_peak_detect = 0;
+				timeout2++;
+				if(timeout2>400){
+					timeout2 = 0;
+					is_detecting_step = 0;
+					number_of_detect = 0;
+					number_of_peak_detect = 0;
+				}
+				if(current_sample <= 200&&number_of_detect<8){
+				    number_of_detect++;
+				}
+				else if(number_of_detect>=8){
+					if(timeout2 >=100){
+						if(thread_hold_peak == 1100){		
+							thread_hold_peak=800;
+						}
+						else if(thread_hold_peak==800){
+							thread_hold_peak = 1100;
+						}
+				    	LCD_clear();
+					    number_of_step++;
+					    display_decimal(number_of_step);
+					}
+					timeout2 = 0;
+					is_detecting_step = 0;
+					number_of_detect = 0;
+					number_of_peak_detect = 0;
 				 }
 			}
-	    
 			sprintf(cmd,"%.2f",current_sample);
-			//PRINTF("%s\r\n",cmd);
 			delay(1);
     }
 }
 uint32_t MY_I2C_MasterGetStatusFlags(I2C_Type *base){
-		// kiem tra thanh ghi status{
+	// kiem tra thanh ghi status{
     uint32_t statusFlags = base->S;
-    /* if (base->FLT & I2C_FLT_STOPF_MASK)  // kiem tra xem co phat hien tin hieu Stop tren Bus I2C khong
-    {
-        statusFlags |= (I2C_FLT_STOPF_MASK<<8);  // danh dau bit phat hien tin hieu stop o bit so 14 (bat dau tu bit so 0)
-    } */
     return statusFlags;
 }
 void I2C_MasterStartSignal(I2C_Type* base, uint8_t address, uint8_t direction){  // Generate tin hieu start va gui dia chi cua  ngoai vi + mode:(write=0/read=1)
-    uint8_t result =0;
+    uint8_t result = 0;
     uint32_t statusFlags = MY_I2C_MasterGetStatusFlags(base);  //  lay gia tri thanh ghi status kem theo 2 bit detect start signal va stop signal dat o bit 12 va 14
-	   if (statusFlags & I2C_S_BUSY_MASK) // kiem tra bus co ban khong 
-    {
+	if (statusFlags & I2C_S_BUSY_MASK) {// kiem tra bus co ban khong 
         result = 1;
-				//PRINTF("Bus Hien tai dang busy \r\n");
     }
-		  else
-    {
-        /* Send the START signal. */
-        base->C1 |= I2C_C1_MST_MASK | I2C_C1_TX_MASK;  // chuyen sang che do master va transmit mode
-			  base->D = (((uint32_t)address) << 1U |direction);  // day du lieu gom dia chi ngoai vi + mode hoat dong
-		}
+	else {
+    	/* Send the START signal. */
+		base->C1 |= I2C_C1_MST_MASK | I2C_C1_TX_MASK;  // chuyen sang che do master va transmit mode
+		base->D = (((uint32_t)address) << 1U |direction);  // day du lieu gom dia chi ngoai vi + mode hoat dong
+	}
 }
 void I2C_MasterStopSignal(I2C_Type* base){
     base->C1 &= ~(I2C_C1_MST_MASK | I2C_C1_TX_MASK | I2C_C1_TXAK_MASK); // chuyen sang mode slave,  Receiver, va co gui tin hieu ack khi nhan data
-    while (base->S & I2C_S_BUSY_MASK) // Doi den khi bus duoc giai phong 
-    {
-    }
+    while (base->S & I2C_S_BUSY_MASK){}// Doi den khi bus duoc giai phong 
 } 
 void MY_I2C_MasterReadBlocking(I2C_Type *base, uint8_t *rxBuff, size_t rxSize)  // Ham nay thuc hien viec doc nhieu byte du lieu vao rxBuff,
 {																																																//neu bo dem da het,no se gui nak va co the kem theo stop signal tuy theo co flags
     volatile uint8_t dummy = 0;
-    while (!(base->S & I2C_S_TCF_MASK))     // kiem tra neu qua trinh nhan lan truoc da hoan thanh chua ?
-    {
-    }
+    while (!(base->S & I2C_S_TCF_MASK)){}     // kiem tra neu qua trinh nhan lan truoc da hoan thanh chua ?
     base->S = I2C_S_IICIF_MASK;  // xoa co ngat
     base->C1 &= ~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK); // dat master o trang thai nhan va co gui ack
     /* If rxSize equals 1, configure to send NAK. */
@@ -506,45 +478,36 @@ void MY_I2C_MasterReadBlocking(I2C_Type *base, uint8_t *rxBuff, size_t rxSize)  
         /* Single byte use case. */
         if (rxSize == 0)  // da truyen di nak roi
         { 
-            I2C_MasterStopSignal(base);  // tao tin hieu stop de ket thuc phien truyen  
+        	I2C_MasterStopSignal(base);  // tao tin hieu stop de ket thuc phien truyen  
         }
         if (rxSize == 1)  // neu buffer ben nhan chi con du de doc 1 byte nua
         {
-           // set thanh ghi C1 de truyen nak sau khi nhan duoc byte du lieu tiep theo
-            base->C1 |= I2C_C1_TXAK_MASK;  // dat master o che do gui nak de ket thuc phien doc sau khi doc byte data cuoi cung 
+        	// set thanh ghi C1 de truyen nak sau khi nhan duoc byte du lieu tiep theo
+        	base->C1 |= I2C_C1_TXAK_MASK;  // dat master o che do gui nak de ket thuc phien doc sau khi doc byte data cuoi cung 
         }
         //Read from the data register. 
         *rxBuff++ = base->D;  // doc du lieu tu thanh ghi data cua i2c module
     }
 }
 int MY_I2C_MasterWriteBlocking(I2C_Type *base, const uint8_t *txBuff, size_t txSize){  
-	  uint8_t statusFlags = 0;
-    uint8_t result  =0;
-    while (!(base->S & I2C_S_TCF_MASK)) // Cho cho den khi Transfet complete, bit 7 thanh ghi status
-    {
-    }
+	uint8_t statusFlags = 0;
+	uint8_t result  =0;
+    while (!(base->S & I2C_S_TCF_MASK)){}// Cho cho den khi Transfet complete, bit 7 thanh ghi status
     base->S = I2C_S_IICIF_MASK;  // Xoa co ngat, bit 1 thanh ghi status
     base->C1 |= I2C_C1_TX_MASK;  // chuyen sang mode Trasmit
-		 while (txSize--)
-    {
+	while (txSize--) {
         base->D = *txBuff++;  // Dat byte gui vao thanh ghi data cua i2c module
-        while (!(base->S & I2C_S_IICIF_MASK))  // Doi cho den khi co ngat, bit 1 thanh ghi status
-        {
-        }
-				statusFlags = base->S;  // Lay trang thai sau khi gui thanh ghi status
+        while (!(base->S & I2C_S_IICIF_MASK)){}  // Doi cho den khi co ngat, bit 1 thanh ghi status
+		statusFlags = base->S;  // Lay trang thai sau khi gui thanh ghi status
         base->S = I2C_S_IICIF_MASK;  // Xoa co ngat, bit 1 thanh ghi status
-        if (statusFlags & I2C_S_ARBL_MASK)  // kiem  tra thanh ghi status xem co bi xung dot khong 
-        {   //PRINTF("Co loi xung dot tren bus i2c khi truyen databyte \r\n");
+        if (statusFlags & I2C_S_ARBL_MASK) { // kiem  tra thanh ghi status xem co bi xung dot khong 
+        	//PRINTF("Co loi xung dot tren bus i2c khi truyen databyte \r\n");
             base->S = I2C_S_ARBL_MASK;  // neu co xung dot thi clear bit ARBL thanh ghi Status
-					  result = 1;          // Danh dau ket qua truyen da bi xung dot
+			result = 1;          // Danh dau ket qua truyen da bi xung dot
         }
-        if ((statusFlags & I2C_S_RXAK_MASK) && txSize)  // neu nhan duoc tin hieu nak, kiem tra xem con du lieu can phai gui khong,
-        {																								// neu nhu co thi tuc la ben nhan khong nhan duoc du lieu
-							
-																												// neu nhu khong thi tuc la ben nhan muon ket thuc viec doc du lieu, dieu nay chi xay ra khi thiet bi goi ham nay dang o slave mode
+        if ((statusFlags & I2C_S_RXAK_MASK) && txSize) {// neu nhan duoc tin hieu nak, kiem tra xem con du lieu can phai gui khong,																																																	
             base->S = I2C_S_RXAK_MASK;   
-					  //PRINTF("Nhan duoc NAK khi truyen databyte \r\n");
-            result =2;                        					// danh dau da nhan duoc nak
+            result =2;                        	
         }
 
         if (result != 0)break;  // neu co xung dot hoac ben nhan khong nhan duoc data, dung viec gui thoat ra khoi vong while
@@ -697,7 +660,7 @@ void LCD_Init(LCD_Type *base){
 		// LCDDOZE: 0
 		// FFR: 0 standard frame rate
 		// ALTSOURCE: 0 Select Alternate Clock Source 1
-		// 13–12 ALTDIV: 0 Divide factor = 1 (No divide)
+		// 13ï¿½12 ALTDIV: 0 Divide factor = 1 (No divide)
 		// FDCIEN:  0 No interrupt request is generated when fault detection is completed
 		// PADSAFE: 0 LCD frontplane and backplane functions enabled
 		// VSUPPLY: 0 Drive VLL3 internally from VDD
