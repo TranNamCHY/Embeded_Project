@@ -1,10 +1,11 @@
 # Introduction
+
 The system is designed to be implemented using the accelerometer modules and peripherals available on the FRDM-KL46z board. The system 
 reads the data from the sensor, processes it to detect the user's footsteps, and displays the number of detected footstep on built in LCD.  
 
 ## System Architecture
-![System Architecture](./Image/board.png)
 
+![System Architecture](./Image/board.png)
 
 | Number  | Peripheral | Function |
 | :-------------: | :-------------: | :-------------: |
@@ -21,23 +22,15 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
 
 - The program begins with initializing the system's operations, including setting up the clock and configuring the operating modes for the system's modules:
 
-    &nbsp; - The system receives the Who request from the ESP8266 through an interrupt from the UART1 module.
-  
-    &nbsp; - The system sends back a confirmation message for the program on STM32, which is currently an application program.
-  
-    &nbsp; - If it receives feedback from the ESP8266 that there is a new firmware version and an update is required, the system immediately resets to address 0x0800000 to switch to the Bootloader program's operation flow.
-  
-    &nbsp; - The Bootloader program continues to receive Who requests from the ESP8266 and responds by confirming that the STM32 is in the Bootloader program.
-  
-    &nbsp; - The system waits until it receives a START response from the ESP8266 and begins the process of receiving and writing firmware into the flash memory.
-  
-    &nbsp; - The firmware will be transmitted line by line in HEX format. STM32 reads each line and checks for errors using a 2-byte checksum at the end of each record. If an error is detected, it will request the retransmission of that record.
-  
-    &nbsp; - If too many errors occur in a single record, the system confirms there is a fault in the physical transmission, at this point, the system will be reset and return to the initial state of the Bootloader program.
-  
-    &nbsp; - After completing the reading and writing of firmware into the flash memory designated for the application program, the Bootloader will perform the procedure to jump to the recorded application program. This includes resetting the PC pointer and vector table to the address of the new program, disabling the clock source of the peripherals, etc.
+- After completing the setup of the modules, the program initializes the variables for the process of reading and processing data from the sensors to detect the user's footsteps:
 
-Flow chart of Minor system:
+    &nbsp; - The variables number_of_peak_detect and number_of_bottom_detect are used to count the number of peaks and the number of troughs of the acceleration values read from the sensor; these two variables are initialized with a value of 0.
+  
+    &nbsp; - The variables thread_hold_number_bottom and thread_hold_number_peak are used to determine the threshold values, which, when exceeded, will change the control flow. These two variables are assigned default values of 20 and 150.
+  
+    &nbsp; - The variables thread_hold_bottom and thread_hold_peak are used to determine the threshold such that when the recorded acceleration is greater than thread_hold_peak or less than thread_hold_bottom, it is considered a peak value or a bottom value.
+  
+    &nbsp; - The variable is_detecting_step is used to control the execution flow of the program. This variable is assigned a value of 1 when number_of_peak_detect is greater than thread_hold_number_peak, and is reset to 0 when the user's footsteps are detected.
 
 ## More
 
