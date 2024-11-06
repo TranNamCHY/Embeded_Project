@@ -15,7 +15,7 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
 | 5  | LCD  | Display the number of footstep  |
 | 6  | MMA8451Qs Cell  | Collect acceleration value.  |
 
-##Flow chart of system: 
+## Flow chart of system: 
 
 ![Flow chart of Major system](./Image/flowchart.png)
 
