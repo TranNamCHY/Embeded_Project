@@ -36,7 +36,7 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
 
 ![](./Image/measurement.png)
 
-- Ta nhận thấy rằng sau mỗi bước chân thì giá trị của gia tốc sẽ tạo thành các đỉnh sóng như ở trên hình, để phát hiện được số bước chân thì ta cần phải phát hiện ra được các đỉnh sóng như vậy, thuật toán chia ra làm 2 giai đoạn:
+- We notice that after each step, the value of acceleration will form wave peaks as shown in the image. To detect the number of steps, we need to identify these wave peaks. The algorithm is divided into two stages:
 
    &nbsp; - Stage 1: Detecting the wave peak: The system continuously reads data from the sensor; when it detects that the current value is greater than the threshold value of the wave peak (thread_hold_peak), it increments the variable counting the number of detected wave peaks (number_of_peak_detect) by one. When the number of detected wave peaks exceeds the threshold value (thread_hold_number_peak), the system transitions to Stage 2 (is_detecting_step = 1).
 
