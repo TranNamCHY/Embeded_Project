@@ -1,11 +1,10 @@
 # Introduction
-The system is designed to work with fingerprint sensor modules, magnetic card sensors, keyboards, servo motors,
-ESP8266 circuit board, Oled screen and STM32F103C8T6 circuit board. System capable of identifying users based 
-on passwords, magnetic cards and fingerprints. It controls the Servo for the door opening/closing process, in 
-addition it also has other functions such as power saving mode, or the ability to update firmware from far aka FOTA. 
+The system is designed to be implemented using the accelerometer modules and peripherals available on the FRDM-KL46z board. The system 
+reads the data from the sensor, processes it to detect the user's footsteps, and displays the number of detected footstep on built in LCD.  
 
 ## System Architecture
 ![System Architecture](./Image/architecture.png)
+
 
 The System divided into 2 subsystems:
 
