@@ -44,4 +44,4 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
 
 ## More
 
-To understand more deeply about the system, you coud check my report attached at Document folder: https://github.com/TranNamCHY/SmartLock/tree/main/Documen
+To understand more deeply about the system, you coud check my report attached at Document folder: [https://github.com/TranNamCHY/SmartLock/tree/main/Documen](https://github.com/TranNamCHY/Embeded_Project/tree/main/Documents)
