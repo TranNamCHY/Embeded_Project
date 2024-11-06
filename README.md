@@ -3,7 +3,7 @@ The system is designed to be implemented using the accelerometer modules and per
 reads the data from the sensor, processes it to detect the user's footsteps, and displays the number of detected footstep on built in LCD.  
 
 ## System Architecture
-![System Architecture](./Image/architecture.png)
+![System Architecture](./Image/board.png)
 
 
 The System divided into 2 subsystems:
