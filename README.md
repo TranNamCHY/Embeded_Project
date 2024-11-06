@@ -7,7 +7,7 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
 
 
 | Number  | Peripheral | Function |
-| ------------- | ------------- | ------------- |
+| :-------------: | :-------------: | :-------------: |
 | 1  | SW1  | Start/Stop Counter  |
 | 2  | SW3  | Reset step number to zero when the system is active  |
 | 3  | Red led  | Turn off when system is active, turn on when system down  |
