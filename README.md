@@ -32,6 +32,13 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
   
     &nbsp; - The variable is_detecting_step is used to control the execution flow of the program. This variable is assigned a value of 1 when number_of_peak_detect is greater than thread_hold_number_peak, and is reset to 0 when the user's footsteps are detected.
 
+- Explain more about the step counter detection algorithm:
+
+![](./Image/measurement.png)
+
+- Ta nhận thấy rằng sau mỗi bước chân thì giá trị của gia tốc sẽ tạo thành các đỉnh sóng như ở trên hình, để phát hiện được số bước chân thì ta cần phải phát hiện ra được các đỉnh sóng như vậy, thuật toán chia ra làm 2 giai đoạn:
+   &nbsp; - Stage 1: Detecting the wave peak: The system continuously reads data from the sensor; when it detects that the current value is greater than the threshold value of the wave peak (thread_hold_peak), it increments the variable counting the number of detected wave peaks (number_of_peak_detect) by one. When the number of detected wave peaks exceeds the threshold value (thread_hold_number_peak), the system transitions to Stage 2 (is_detecting_step = 1).
+  &nbsp; - Stage 2: Wave bottom detection: When the input value is detected to be less than the wave bottom threshold (thread_hold_bottom), it increments the variable counting the number of detected wave bottoms (number_of_bottom_detect) by one. When the number of wave bottoms exceeds the threshold value (thread_hold_number_bottom), the system will consider it as detecting the user's footsteps, it will update the number of steps (number_of_step), display the new number of steps on the LCD, and then reset the values of the counting and control variables.
 ## More
 
 To understand more deeply about the system, you coud check my report attached at Document folder: https://github.com/TranNamCHY/SmartLock/tree/main/Document
