@@ -19,7 +19,7 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
 
 ![Flow chart of Major system](./Image/flowchart.png)
 
-The program begins with initializing the system's operations, including setting up the clock and configuring the operating modes for the system's modules:
+- The program begins with initializing the system's operations, including setting up the clock and configuring the operating modes for the system's modules:
 
     &nbsp; - The system receives the Who request from the ESP8266 through an interrupt from the UART1 module.
   
