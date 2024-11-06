@@ -6,6 +6,14 @@ reads the data from the sensor, processes it to detect the user's footsteps, and
 ![System Architecture](./Image/board.png)
 
 
+| Number  | Peripheral | Function |
+| ------------- | ------------- | ------------- |
+| 1  | SW1  | Start/Stop Counter  |
+| 2  | SW3  | Reset step number to zero when the system is active  |
+| 3  | Red led  | Turn off when system is active, turn on when system down  |
+| 4  | Green led  | Flicker when system is active,  turn off when system down |
+| 5  | LCD  | Display the number of footstep  |
+| 6  | MMA8451Qs Cell  | Collect acceleration value.  |
 The System divided into 2 subsystems:
 
 - Major system: Including microcontroller STM32F103C8T6 and peripherals used include: AS608 fingerprint sensor,
